@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Diwali Wishes!</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        @keyframes flicker {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.15) translateY(-2px); opacity: 1; filter: drop-shadow(0 0 15px #ff7b00); }
+        }
+        .diya-flame { animation: flicker 0.15s infinite alternate; }
+        body { background-color: #050515; overflow-x: hidden; font-family: system-ui, sans-serif; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex items-center justify-center relative">
+
+    <!-- Canvas for Animated Fireworks -->
+    <canvas id="fireworksCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 hidden"></canvas>
+
+    <!-- Phase 1: Name Input Screen -->
+    <div id="welcomeScreen" class="z-10 w-full max-w-md mx-4 p-8 rounded-2xl bg-slate-900/80 border border-amber-500/30 backdrop-blur-md shadow-2xl text-center transition-all duration-700">
+        <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-yellow-300 to-orange-500 mb-2">🪔 Shubh Deepavali 🪔</h1>
+        <p class="text-slate-300 mb-6 text-sm">Someone sent you a magical festive greeting.</p>
+        
+        <div class="mb-6">
+            <input type="text" id="userName" placeholder="Enter your name here..." 
+                   class="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition-colors text-center text-lg">
+        </div>
+        
+        <button onclick="startCelebration()" class="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 font-bold py-3 rounded-lg shadow-lg hover:shadow-amber-500/20 transition-all duration-300 text-lg cursor-pointer">
+            Open Greeting ✨
+        </button>
+    </div>
+
+    <!-- Phase 2: Animated Wish Screen -->
+    <div id="wishScreen" class="hidden z-10 w-full max-w-2xl mx-4 text-center py-12 flex flex-col items-center justify-center min-h-screen opacity-0 transition-opacity duration-1000">
+        
+        <!-- Animated Diya -->
+        <div class="relative w-32 h-24 mb-8 flex flex-col items-center justify-end">
+            <!-- Flame -->
+            <div class="diya-flame w-6 h-10 bg-gradient-to-t from-orange-600 via-amber-400 to-yellow-200 rounded-full blur-[1px] absolute top-2 origin-bottom"></div>
+            <!-- Base -->
+            <div class="w-24 h-12 bg-gradient-to-b from-amber-700 to-amber-900 rounded-b-full border-t-4 border-amber-500 shadow-xl"></div>
+        </div>
+
+        <!-- Dynamic Header -->
+        <h2 id="greetingHeading" class="text-4xl md:text-6xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-orange-400 mb-6 drop-shadow-sm"></h2>
+        
+        <!-- Scrolling / Fading Wishes Content -->
+        <div class="bg-slate-900/40 border border-amber-500/20 p-6 rounded-xl backdrop-blur-sm max-w-md w-full shadow-inner mb-6">
+            <p class="text-xl md:text-2xl text-amber-100 font-medium leading-relaxed italic animate-pulse">
+                "May the divine light of Diwali spread into your life peace, prosperity, happiness, and good health!"
+            </p>
+        </div>
+
+        <p class="text-xs text-slate-400 tracking-widest uppercase mt-4">Move your cursor or scroll to burst more fireworks! 🎆</p>
+    </div>
+
+    <script>
+        // Transition Screen Logic
+        function startCelebration() {
+            const nameInput = document.getElementById('userName').value.trim();
+            if(!nameInput) {
+                alert("Please enter your name to unlock the wishes!");
+                return;
+            }
+
+            document.getElementById('greetingHeading').innerText = `Happy Diwali, ${nameInput}! ✨`;
+            
+            const welcome = document.getElementById('welcomeScreen');
+            const wish = document.getElementById('wishScreen');
+            const canvas = document.getElementById('fireworksCanvas');
+
+            welcome.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                welcome.classList.add('hidden');
+                canvas.classList.remove('hidden');
+                wish.classList.remove('hidden');
+                setTimeout(() => wish.classList.add('opacity-100'), 50);
+                initFireworks();
+            }, 700);
+        }
+
+        // Lightweight Canvas Fireworks engine
+        function initFireworks() {
+            const canvas = document.getElementById('fireworksCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            let particles = [];
+
+            class Particle {
+                constructor(x, y, color) {
+                    this.x = x;
+                    this.y = y;
+                    this.color = color;
+                    this.radius = Math.random() * 3 + 1;
+                    this.velocity = {
+                        x: (Math.random() - 0.5) * 8,
+                        y: (Math.random() - 0.5) * 8
+                    };
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.015 + 0.015;
+                }
+                draw() {
+                    ctx.save();
+                    ctx.globalAlpha = this.alpha;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = this.color;
+                    ctx.fill();
+                    ctx.restore();
+                }
+                update() {
+                    this.x += this.velocity.x;
+                    this.y += this.velocity.y;
+                    this.velocity.y += 0.04; // gravity simulation
+                    this.alpha -= this.decay;
+                }
+            }
+
+            function spawnFirework(x, y) {
+                const colors = ['#f59e0b', '#ef4444', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6'];
+                const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+                for (let i = 0; i < 30; i++) {
+                    particles.push(new Particle(x, y, chosenColor));
+                }
+            }
+
+            // Auto spawn fireworks periodically
+            setInterval(() => {
+                spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height * 0.6);
+            }, 1200);
+
+            // Trigger firework on interaction
+            window.addEventListener('mousemove', (e) => {
+                if(Math.random() < 0.08) spawnFirework(e.clientX, e.clientY);
+            });
+            window.addEventListener('scroll', () => {
+                if(Math.random() < 0.2) spawnFirework(Math.random() * canvas.width, Math.random() * canvas.height);
+            });
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.fillStyle = 'rgba(5, 5, 21, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach((p, index) => {
+                    if (p.alpha <= 0) {
+                        particles.splice(index, 1);
+                    } else {
+                        p.update();
+                        p.draw();
+                    }
+                });
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
