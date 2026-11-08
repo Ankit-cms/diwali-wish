@@ -67,7 +67,7 @@ export function FinalGreeting({ name, from, onRestart }: FinalGreetingProps) {
           <RotateCcw className="size-4" aria-hidden="true" />
           Not {name}? Create your own celebration
         </button>
-        <p>Made with light &amp; love · Happy Diwali {new Date().getFullYear()} 🪔</p>
+        <p>Handcrafted with light & love by Ankit Sharma · Happy Diwali {new Date().getFullYear()} 🪔</p>
       </footer>
     </section>
   );
